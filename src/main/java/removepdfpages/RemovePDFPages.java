@@ -10,8 +10,6 @@ import java.io.IOException;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.PDFReader;
-import org.apache.pdfbox.pdfviewer.PageWrapper;
 
 /**
  *
@@ -23,7 +21,6 @@ public class RemovePDFPages extends javax.swing.JFrame {
     private PDDocument outFile;
     private PDDocument inFile;
     private String logString;
-    private PDFReader reader;
 
     /**
      * Creates new form RemovePDFPages
