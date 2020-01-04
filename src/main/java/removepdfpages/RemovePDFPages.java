@@ -7,9 +7,11 @@ package removepdfpages;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
 
 /**
  *
@@ -18,9 +20,11 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 public class RemovePDFPages extends javax.swing.JFrame {
     
     private JFileChooser loadChooser;
+    private JFileChooser saveChooser;
     private PDDocument outFile;
     private PDDocument inFile;
     private String logString;
+    private ArrayList<Integer> delPages;
 
     /**
      * Creates new form RemovePDFPages
@@ -33,7 +37,14 @@ public class RemovePDFPages extends javax.swing.JFrame {
         loadChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         loadChooser.setFileFilter(new FileNameExtensionFilter("PDF files", "pdf"));
         
+        saveChooser = new JFileChooser();
+        saveChooser.setCurrentDirectory(new File("C:\\temp"));
+        saveChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        
+        inFile = null;
+        outFile = null;
         logString = "";
+        delPages = new ArrayList<>();
     }
 
     /**
@@ -128,6 +139,8 @@ public class RemovePDFPages extends javax.swing.JFrame {
             baseFile = loadChooser.getSelectedFile();
             try {
                 inFile = PDDocument.load(baseFile);
+                delPages.clear();
+                outFile = null;
             } catch (IOException io) {
                 addToLog("Failed to load pdf");
             }
@@ -139,4 +152,41 @@ public class RemovePDFPages extends javax.swing.JFrame {
     private void addToLog(String outMessage) {
         String.join("", logString, outMessage, "\n");
     }
+    
+    private void createOutFile() {
+        int i = 0;
+        if (inFile != null) {
+            outFile = new PDDocument();
+            for (PDPage page:inFile.getPages()) {
+                if (!delPages.contains(i)) {
+                    outFile.addPage(inFile.getPage(i));
+                }
+                i++;
+            }
+        } else {
+            addToLog("No source file selected");
+        }
+    }
+    
+    private void saveFile() {
+        int retVal = saveChooser.showOpenDialog(this);
+        
+        String savePath;
+        
+        if (retVal == JFileChooser.APPROVE_OPTION) {
+            savePath = saveChooser.getSelectedFile().getAbsolutePath();
+            if (outFile != null) {
+                try {
+                    outFile.save(savePath);
+                } catch (IOException ioe) {
+                    addToLog("Failed to save");
+                }
+            } else {
+                addToLog("No outFile created (This should never happen)");
+            }
+        } else {
+            addToLog("No save path selected");
+        }
+    }
+    
 }
